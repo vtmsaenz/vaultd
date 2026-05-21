@@ -6,5 +6,11 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Vaultd uses the camera to scan QR codes on your stored items and to photograph items for your records.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Vaultd can save photos of your items and memories to your photo library.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>Vaultd uses NFC to read and write tags attached to your stored items for quick lookup.</string>
 </dict>
 </plist>
