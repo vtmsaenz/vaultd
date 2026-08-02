@@ -62,9 +62,10 @@ final class StorageBox: Hashable {
     var hasNFCTag: Bool = false
     var createdAt: Date = Date()
 
-    /// All items stored in this box.
+    /// All items stored in this box. Optional array — SwiftData/CloudKit requires
+    /// relationships to be optional.
     @Relationship(deleteRule: .nullify, inverse: \VaultItem.box)
-    var items: [VaultItem] = []
+    var items: [VaultItem]? = []
 
     init(
         boxNumber: Int,

@@ -191,7 +191,7 @@ struct BoxRowView: View {
                     .font(.headline).foregroundStyle(Color.vaultDark)
                 HStack(spacing: 8) {
                     // Item count
-                    Label("\(box.items.count) item\(box.items.count == 1 ? "" : "s")",
+                    Label("\(box.items?.count ?? 0) item\((box.items?.count ?? 0) == 1 ? "" : "s")",
                           systemImage: "shippingbox")
                         .font(.caption).foregroundStyle(.secondary)
                     if !box.location.isEmpty {
@@ -226,7 +226,7 @@ struct BoxDetailView: View {
     @State private var showNFCAlert      = false
 
     var sortedItems: [VaultItem] {
-        box.items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        (box.items ?? []).sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     var body: some View {
@@ -290,7 +290,7 @@ struct BoxDetailView: View {
                     HStack {
                         Text("Items")
                             .font(.headline).foregroundStyle(Color.vaultDark)
-                        Text("\(box.items.count)")
+                        Text("\(box.items?.count ?? 0)")
                             .font(.caption.bold())
                             .foregroundStyle(.white)
                             .padding(.horizontal, 8).padding(.vertical, 3)

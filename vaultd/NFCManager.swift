@@ -129,6 +129,9 @@ extension NFCManager: NFCNDEFReaderSessionDelegate {
     func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
         guard let tag = tags.first else { return }
 
+        // CoreNFC's tag completion handlers (connect/readNDEF/queryNDEFStatus/writeNDEF) run on
+        // an internal background queue regardless of the session's delegate queue, so every
+        // state mutation and caller completion below must be hopped back to the main thread.
         session.connect(to: tag) { [weak self] error in
             guard let self else { return }
             if let error {
@@ -154,7 +157,7 @@ extension NFCManager: NFCNDEFReaderSessionDelegate {
                            text.hasPrefix("VAULTD-") {
                             session.alertMessage = "Box found!"
                             session.invalidate()
-                            self.scannedPayload = text
+                            DispatchQueue.main.async { self.scannedPayload = text }
                             return
                         }
                     }
@@ -166,31 +169,31 @@ extension NFCManager: NFCNDEFReaderSessionDelegate {
                 tag.queryNDEFStatus { status, _, error in
                     if let error {
                         session.invalidate(errorMessage: error.localizedDescription)
-                        completion(false)
+                        DispatchQueue.main.async { completion(false) }
                         return
                     }
                     switch status {
                     case .notSupported:
                         session.invalidate(errorMessage: "This tag doesn't support NDEF.")
-                        completion(false)
+                        DispatchQueue.main.async { completion(false) }
                     case .readOnly:
                         session.invalidate(errorMessage: "This tag is read-only and can't be programmed.")
-                        completion(false)
+                        DispatchQueue.main.async { completion(false) }
                     case .readWrite:
                         let message = NFCNDEFMessage(records: [self.makeTextRecord(payload)])
                         tag.writeNDEF(message) { error in
                             if let error {
                                 session.invalidate(errorMessage: "Write failed: \(error.localizedDescription)")
-                                completion(false)
+                                DispatchQueue.main.async { completion(false) }
                             } else {
                                 session.alertMessage = "NFC tag programmed! Stick it on Box \(payload.components(separatedBy: "-")[2])."
                                 session.invalidate()
-                                completion(true)
+                                DispatchQueue.main.async { completion(true) }
                             }
                         }
                     @unknown default:
                         session.invalidate(errorMessage: "Unknown tag status.")
-                        completion(false)
+                        DispatchQueue.main.async { completion(false) }
                     }
                 }
             }
